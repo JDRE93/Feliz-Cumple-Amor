@@ -1,57 +1,136 @@
-/* Este es tu archivo de estilos. 
-  Contiene los estilos que ya tenías más los nuevos.
-*/
+/* Este es tu archivo de estilos. */
 
 body {
     font-family: 'Inter', sans-serif;
     background-color: #FDFBF5;
 }
 
-/* Estilos para el cupón bloqueado */
+/* ======================================================
+   ESTILOS PARA EL CUPÓN BLOQUEADO (CON FOTO DE FONDO)
+   ====================================================== */
 .coupon-locked {
+    /* Mantenemos el patrón de fondo como "capa base" por si la imagen falla */
     background-image: linear-gradient(to right, #6b7280 10px, transparent 10px), linear-gradient(to bottom, #6b7280 10px, transparent 10px),
                       linear-gradient(to right, #d1d5db 1px, transparent 1px), linear-gradient(to bottom, #d1d5db 1px, transparent 1px);
     background-size: 110px 60px, 60px 110px, 10px 10px, 10px 10px;
     background-color: #f3f4f6;
     border: 2px dashed #9ca3af;
+    
+    /* Importante para posicionar la imagen y el candado */
+    position: relative;
+    overflow: hidden; 
 }
 
+/* La imagen de fondo (en blanco y negro y borrosa) */
+.coupon-locked-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    
+    /* El efecto visual de "bloqueado" */
+    filter: grayscale(100%) blur(2px);
+    opacity: 0.3; /* Baja opacidad para que se vea el texto encima */
+    z-index: 1;
+}
+
+/* El ícono del candado */
 .coupon-locked .lock-icon {
     font-size: 4rem;
     line-height: 1;
     color: #9ca3af;
+    
+    /* Centrado y por encima de la imagen */
+    position: absolute;
+    top: 40%; /* Un poco más arriba del centro */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    
+    /* Sombra para que se lea bien sobre cualquier foto */
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Aseguramos que el texto del cupón bloqueado esté por encima de la imagen */
+.coupon-locked h3, 
+.coupon-locked p,
+.coupon-locked span {
+    position: relative;
+    z-index: 10;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8); /* Halo blanco para legibilidad */
 }
 
 /* ======================================================
-  ¡NUEVO! ESTILO PARA EL CUPÓN CANJEADO
-  ======================================================
-*/
+   ESTILOS PARA EL CUPÓN CANJEADO
+   ====================================================== */
 .coupon-redeemed .bg-white {
     /* Le pone una opacidad para que se vea "usado" */
     opacity: 0.6; 
+    transition: opacity 0.3s ease;
 }
 
 .coupon-redeemed .redeem-overlay {
-    /* Este es el "tachón" rojo */
     position: absolute;
     top: 50%;
     left: 5%;
     right: 5%;
-    height: 4px;
+    height: 50px; /* Altura del contenedor del texto */
     background-color: #ef4444; /* Rojo */
     transform: rotate(-5deg) translateY(-50%);
-    opacity: 0.8;
-    text-align: center;
+    opacity: 0.9;
     
-    /* Estilo del texto "CANJEADO" */
+    /* Texto "CANJEADO" */
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-family: 'Inter', sans-serif;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    z-index: 50;
+}
+
+/* ======================================================
+   ESTILOS PARA EL CONTADOR REGRESIVO
+   ====================================================== */
+.countdown-container {
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-top: 4px solid #d4af37; /* brand-gold */
+    max-width: 800px;
+    margin: 0 auto; /* Centrado horizontal */
+}
+
+.countdown-box {
+    text-align: center;
+    min-width: 70px; /* Para que no bailen los números */
+}
+
+.countdown-number {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem; /* Ajustado para móviles */
+    color: #722f37; /* brand-wine */
+    line-height: 1;
+}
+
+/* Ajuste para pantallas más grandes */
+@media (min-width: 768px) {
+    .countdown-number {
+        font-size: 3.5rem;
+    }
+}
+
+.countdown-label {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.2rem;
+    color: #374151; /* gray-700 */
+    margin-top: 0.5rem;
 }

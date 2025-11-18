@@ -1,53 +1,57 @@
 /*
   Este es tu archivo de JavaScript.
+  Versión Final: Clasificación automática en dos secciones (Fechas vs On-Demand).
 */
 
+// ======================================================
 // --- 1. TU BASE DE DATOS DE CUPONES ---
+// ======================================================
 const couponsToUnlock = [
     {
         id: 'cumple-01',
         unlockDate: '2026-01-03T00:00:00',
         title: '¡Vale de Cumpleaños Oficial!',
-        description: 'Vale por (1) día de ser la Reina Absoluta...',
-        imageUrl: 'https://placehold.co/600x400/fecdd3/722f37?text=Foto+Reina+Absoluta',
+        description: 'Vale por (1) día de ser la Reina Absoluta. Cero quehaceres, tu comida favorita y control total del TV.',
+        imageUrl: './img/cupon.png', 
         category: 'Día Especial' 
+    },
+    {
+        id: 'viaje-mama',
+        unlockDate: '2026-02-15T00:00:00', 
+        title: '¡Viaje a Cartagena con tu Mamá!',
+        description: 'Un regalo para que creen recuerdos juntas. ¡Vuelo y estadía para dos! Prepárense.',
+        imageUrl: './img/cartagena.png', 
+        category: 'Familiar'
     },
     {
         id: 'coupon-4',
         unlockDate: '2026-02-14T00:00:00',
-        title: 'Cupón de San Valentín',
-        description: 'Vale por (1) aventura sorpresa. Prepara un bolso pequeño...',
-        imageUrl: 'https://placehold.co/600x400/722f37/ffffff?text=Foto+Aventura+Secreta',
+        title: 'Cupón de San Valentín (Medellín)',
+        description: '¡Nuestra escapada a Medellín! Prepara un bolso pequeño. Tienes un mes para emocionarte.',
+        imageUrl: './img/Medellin.jpg',
         category: 'Romántico'
     },
-    {
-        id: 'coupon-3',
-        unlockDate: '2026-02-01T08:00:00',
-        title: 'Vale por (1) Masaje Profesional',
-        description: 'Un masaje de 60 minutos (¡esta vez de verdad!)...',
-        imageUrl: 'https://placehold.co/600x400/e0e7ff/3730a3?text=Foto+Relax',
-        category: 'Relajación'
-    },
-    // --- Cupones On-Demand (sin fecha) ---
+    // --- CUPONES SIN FECHA (ON-DEMAND) ---
     {
         id: 'demand-01', 
+        // Sin unlockDate -> Se irá a la sección de abajo
         title: 'Vale por (1) Masaje Express',
-        description: 'Canjeable en CUALQUIER momento. Válido por 15 minutos...',
-        imageUrl: 'https://placehold.co/600x400/c4b5fd/5b21b6?text=Masaje+Express',
+        description: 'Canjeable en CUALQUIER momento. Válido por 15 minutos de masaje en hombros y cuello.',
+        imageUrl: './img/Masage.jpg',
         category: 'Relajación'
     },
     {
         id: 'demand-02', 
         title: 'Vale por (1) "Ganas tú"',
-        description: 'Para usar sabiamente en nuestra próxima discusión...',
-        imageUrl: 'https://placehold.co/600x400/fde68a/854d0e?text=Paz+%26+Amor',
+        description: 'Para usar sabiamente en nuestra próxima discusión (no muy seria). Ganas tú.',
+        imageUrl: './img/cupon.png',
         category: 'Romántico'
     },
     {
         id: 'demand-03', 
         title: 'Vale por (1) Noche de Pelis',
-        description: 'Tú eliges la película, yo hago las palomitas...',
-        imageUrl: 'https://placehold.co/600x400/a7f3d0/047857?text=Noche+de+Pelis',
+        description: 'Tú eliges la película (¡sin quejarme!), yo hago las palomitas y preparo el nido.',
+        imageUrl: 'https://placehold.co/600x400/a7f3d0/047857?text=Noche+de+Pelis', // Ejemplo placeholder
         category: 'Familiar'
     }
 ];
@@ -67,12 +71,10 @@ const categoryStyles = {
 // ======================================================
 // --- HELPERS DE LOCALSTORAGE ---
 // ======================================================
-
 function getRedeemedCoupons() {
     const redeemed = localStorage.getItem('redeemedCoupons');
     return redeemed ? JSON.parse(redeemed) : [];
 }
-
 function saveRedeemedCoupon(couponId) {
     let redeemed = getRedeemedCoupons();
     if (!redeemed.includes(couponId)) {
@@ -86,7 +88,6 @@ function saveRedeemedCoupon(couponId) {
 // ======================================================
 
 function createUnlockedCardHTML(coupon) {
-    
     let dateText = '';
     if (coupon.unlockDate) {
         const unlockDate = new Date(coupon.unlockDate);
@@ -94,15 +95,10 @@ function createUnlockedCardHTML(coupon) {
     } else {
         dateText = '<span class="text-green-600 font-bold">¡Canjeable cuando quieras!</span>';
     }
-
     let categoryHTML = '';
     if (coupon.category) {
         const styleClasses = categoryStyles[coupon.category] || categoryStyles['Default'];
-        categoryHTML = `
-            <span class="${styleClasses} inline-block text-xs font-semibold px-3 py-1 rounded-full uppercase mb-3">
-                ${coupon.category}
-            </span>
-        `;
+        categoryHTML = `<span class="${styleClasses} inline-block text-xs font-semibold px-3 py-1 rounded-full uppercase mb-3">${coupon.category}</span>`;
     }
 
     return `
@@ -110,7 +106,7 @@ function createUnlockedCardHTML(coupon) {
             <img 
                 src="${coupon.imageUrl}" 
                 alt="${coupon.title}" 
-                class="w-full h-48 object-cover"
+                class="w-full object-cover" 
                 onerror="this.src='https://placehold.co/600x400/fecaca/b91c1c?text=Error+al+cargar+la+foto'"
             >
             <div class="p-6">
@@ -123,8 +119,7 @@ function createUnlockedCardHTML(coupon) {
                 </button>
             </div>
             <div class="redeem-overlay-container"></div> 
-        </div>
-    `;
+        </div>`;
 }
 
 function createLockedCardHTML(coupon) {
@@ -132,170 +127,192 @@ function createLockedCardHTML(coupon) {
     let categoryHTML = '';
     if (coupon.category) {
         const styleClasses = categoryStyles[coupon.category] || categoryStyles['Default'];
-        categoryHTML = `
-            <span class="${styleClasses} opacity-60 inline-block text-xs font-semibold px-3 py-1 rounded-full uppercase mb-3">
-                ${coupon.category}
-            </span>
-        `;
+        categoryHTML = `<span class="${styleClasses} opacity-70 inline-block text-xs font-semibold px-3 py-1 rounded-full uppercase mb-3 z-10 relative">${coupon.category}</span>`;
     }
 
     return `
-        <div class="coupon-locked rounded-lg p-6 flex flex-col items-center justify-center h-64">
+        <div class="coupon-locked rounded-lg p-6 flex flex-col items-center justify-center relative min-h-[16rem]">
+            <img src="${coupon.imageUrl}" alt="Bloqueado" class="coupon-locked-image" onerror="this.style.display='none'">
             <div class="lock-icon">🔒</div>
-            <h3 class="font-script text-2xl text-gray-600 mt-4">Cupón Bloqueado</h3>
-            <p class="text-gray-500 font-semibold mb-3">Se desbloquea el ${unlockDate.toLocaleString('es-ES', { day: 'numeric', month: 'long' })}</p>
+            <h3 class="font-script text-2xl text-gray-800 mt-4 z-10 relative drop-shadow-md">Cupón Bloqueado</h3>
+            <p class="text-gray-600 font-semibold mb-3 z-10 relative drop-shadow-md">Se desbloquea el ${unlockDate.toLocaleString('es-ES', { day: 'numeric', month: 'long' })}</p>
             ${categoryHTML}
-        </div>
-    `;
+        </div>`;
+}
+
+// ======================================================
+// --- FUNCIÓN DEL CONTADOR ---
+// ======================================================
+let countdownInterval = null; 
+function startCountdown(targetDate) {
+    const countdownSection = document.getElementById('countdown-section');
+    const daysEl = document.getElementById('timer-days');
+    const hoursEl = document.getElementById('timer-hours');
+    const minutesEl = document.getElementById('timer-minutes');
+    const secondsEl = document.getElementById('timer-seconds');
+    countdownSection.classList.remove('hidden');
+    function updateTimer() {
+        const now = new Date().getTime();
+        const distance = targetDate.getTime() - now;
+        if (distance < 0) {
+            clearInterval(countdownInterval);
+            countdownSection.innerHTML = `<h2 class="font-script text-5xl text-brand-wine">¡Tu regalo está listo!</h2>`;
+            setTimeout(() => window.location.reload(), 4000); 
+            return;
+        }
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        daysEl.textContent = String(days).padStart(2, '0');
+        hoursEl.textContent = String(hours).padStart(2, '0');
+        minutesEl.textContent = String(minutes).padStart(2, '0');
+        secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+    updateTimer(); 
+    countdownInterval = setInterval(updateTimer, 1000); 
 }
 
 
-// Esta función se ejecuta cuando la página termina de cargar
+// ======================================================
+// --- LÓGICA PRINCIPAL ---
+// ======================================================
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- LÓGICA DE PRUEBA DE FECHA ---
-    const today = new Date('2026-01-03T10:00:00'); // <-- ¡Fijado el 3 de Enero para probar!
-    // const today = new Date(); 
+    // --- PRUEBA DE FECHAS (Para ti como desarrollador) ---
+    // const today = new Date('2025-11-30T10:00:00'); // FASE 1
+    const today = new Date('2025-12-04T10:00:00'); // FASE 2
+    // const today = new Date('2026-01-03T10:00:00'); // FASE 3
+    
+    // const today = new Date(); // <-- ¡USA ESTA PARA LA VERSIÓN FINAL!
     
     
-    // ======================================================
-    // --- 2. LÓGICA DEL TEASER (DÍA 1) ---
-    // ======================================================
+    // --- FECHAS CLAVE ---
+    const preBirthdayRevealDate = new Date('2025-12-03T00:00:00'); 
+    const birthdayDate = new Date('2026-01-03T00:00:00'); 
     
-    const birthday = new Date('2026-01-03T00:00:00');
+    const countdownSection = document.getElementById('countdown-section');
+    const teaserSection = document.getElementById('teaser-section');
+    const couponsSection = document.getElementById('coupons-section');
     
-    const isBirthday = today.getFullYear() === birthday.getFullYear() &&
-                       today.getMonth() === birthday.getMonth() &&
-                       today.getDate() === birthday.getDate();
+    // --- ¡NUEVO! Capturamos los dos contenedores por separado ---
+    const dateContainer = document.getElementById('date-coupons-container');
+    const demandContainer = document.getElementById('demand-coupons-container');
 
-    if (isBirthday) {
-        
-        const teaserSection = document.getElementById('teaser-section');
-        if (teaserSection) {
-            teaserSection.classList.remove('hidden');
-        }
+
+    if (today < preBirthdayRevealDate) {
+        // --- FASE 1 ---
+        startCountdown(birthdayDate);
+
+    } else if (today >= preBirthdayRevealDate && today < birthdayDate) {
+        // --- FASE 2 ---
+        startCountdown(birthdayDate); 
+        teaserSection.classList.remove('hidden'); 
 
         const teaserCard = document.getElementById('teaser-card');
         if (teaserCard) {
-            
-            const ID_DEL_CUPON_A_MOSTRAR = 'coupon-3'; // ¡Revela el masaje!
-            
+            const ID_DEL_CUPON_A_MOSTRAR = 'viaje-mama'; 
             const couponToTease = couponsToUnlock.find(c => c.id === ID_DEL_CUPON_A_MOSTRAR);
-
             if (couponToTease) {
-                
-                // --- ¡LÓGICA DE REVELACIÓN (ARREGLADA)! ---
                 teaserCard.addEventListener('click', () => {
-                    
-                    const targetSlot = document.getElementById(`coupon-slot-${couponToTease.id}`);
-                    
-                    if (targetSlot) {
-                        // 1. Genera el HTML del cupón desbloqueado
-                        const unlockedHTML = createUnlockedCardHTML(couponToTease);
-                        
-                        // 2. REEMPLAZA el cupón bloqueado por el desbloqueado
-                        targetSlot.innerHTML = unlockedHTML;
-                        
-                        // 3. Actualiza la tarjeta teaser
-                        teaserCard.style.cursor = 'default';
-                        teaserCard.innerHTML = `
-                            <h3 class="font-script text-3xl text-brand-wine mb-2">¡Revelado!</h3>
-                            <p class="text-gray-700 font-semibold">Revisa tu lista de cupones... 😉</p>
-                        `;
-                    }
-                    
-                }, { once: true }); // Solo se puede hacer clic una vez
+                    const unlockDate = new Date(couponToTease.unlockDate);
+                    teaserCard.classList.remove('coupon-locked');
+                    teaserCard.style.padding = '0';
+                    teaserCard.style.cursor = 'default';
+                    teaserCard.style.minHeight = '0'; 
+
+                    teaserCard.innerHTML = `
+                        <div class="bg-white rounded-lg shadow-lg overflow-hidden w-full">
+                            <img 
+                                src="${couponToTease.imageUrl}" 
+                                class="w-full object-contain rounded-t-lg max-h-96" 
+                                onerror="this.src='https://placehold.co/600x400/fecaca/b91c1c?text=Error+en+foto'"
+                            >
+                            <div class="p-6 text-center">
+                                <h3 class="font-script text-3xl text-brand-wine mb-2">¡Adelanto Exclusivo!</h3>
+                                <p class="text-gray-700 font-semibold mb-2">${couponToTease.title}</p>
+                                <p class="text-gray-500 text-sm">Prepárense... este cupón les estará esperando el</p>
+                                <p class="text-gray-800 font-bold text-lg">${unlockDate.toLocaleString('es-ES', { day: 'numeric', month: 'long' })}</p>
+                            </div>
+                        </div>
+                    `;
+                }, { once: true });
             }
         }
-    }
 
-    // ======================================================
-    // --- 3. LÓGICA DE DESBLOQUEO (REPARADA) ---
-    // ======================================================
-    
-    const container = document.getElementById('coupons-container');
-    const redeemedIds = getRedeemedCoupons(); 
-    
-    couponsToUnlock.forEach(coupon => {
+    } else {
+        // --- FASE 3 ---
+        countdownSection.classList.add('hidden');
+        teaserSection.classList.add('hidden');
+        couponsSection.classList.remove('hidden'); 
         
-        let cardHTML = '';
-        let slotClass = ''; 
+        const redeemedIds = getRedeemedCoupons(); 
+        
+        couponsToUnlock.forEach(coupon => {
+            let cardHTML = '';
+            let slotClass = ''; 
+            let targetContainer = null; // Variable para saber dónde ponerlo
 
-        if (redeemedIds.includes(coupon.id)) {
-            
-            // 1. SI ESTÁ CANJEADO:
-            cardHTML = createUnlockedCardHTML(coupon); 
-            cardHTML = cardHTML.replace(
-                '<div class="redeem-overlay-container"></div>', 
-                '<div class="redeem-overlay-container"><div class="redeem-overlay">CANJEADO</div></div>'
-            );
-            slotClass = 'coupon-redeemed'; 
-            
-        } else if (coupon.unlockDate) {
-            // 2. CON FECHA (no canjeado):
-            const unlockDate = new Date(coupon.unlockDate); 
-            if (today >= unlockDate) {
+            // 1. GENERAR HTML
+            if (redeemedIds.includes(coupon.id)) {
                 cardHTML = createUnlockedCardHTML(coupon); 
+                cardHTML = cardHTML.replace(
+                    '<div class="redeem-overlay-container"></div>', 
+                    '<div class="redeem-overlay-container"><div class="redeem-overlay">CANJEADO</div></div>'
+                );
+                slotClass = 'coupon-redeemed'; 
+            } else if (coupon.unlockDate) {
+                const unlockDate = new Date(coupon.unlockDate); 
+                if (today >= unlockDate) {
+                    cardHTML = createUnlockedCardHTML(coupon); 
+                } else {
+                    cardHTML = createLockedCardHTML(coupon); 
+                }
             } else {
-                cardHTML = createLockedCardHTML(coupon); 
+                cardHTML = createUnlockedCardHTML(coupon);
             }
-        } else {
-            // 3. SIN FECHA (no canjeado):
-            cardHTML = createUnlockedCardHTML(coupon);
-        }
-        
-        container.innerHTML += `
-            <div id="coupon-slot-${coupon.id}" class="${slotClass}">
-                ${cardHTML}
-            </div>
-        `;
-    });
+            
+            // 2. CLASIFICAR EL CUPÓN
+            if (coupon.unlockDate) {
+                // Si tiene fecha -> va al contenedor de fechas
+                targetContainer = dateContainer;
+            } else {
+                // Si no tiene fecha -> va al contenedor on-demand
+                targetContainer = demandContainer;
+            }
+
+            // 3. INSERTAR EN EL DOM
+            if (targetContainer) {
+                targetContainer.innerHTML += `<div id="coupon-slot-${coupon.id}" class="${slotClass}">${cardHTML}</div>`;
+            }
+        });
+    }
 });
 
 // ======================================================
-// --- 4. FUNCIÓN DE CANJEAR (LIMPIADA) ---
+// --- 4. FUNCIÓN DE CANJEAR ---
 // ======================================================
-function redeemCoupon(couponId) { // Ya no necesita "forceRedeem"
-    
+function redeemCoupon(couponId) {
     const cardSlot = document.getElementById(`coupon-slot-${couponId}`);
-    
     if (cardSlot && cardSlot.classList.contains('coupon-redeemed')) {
         alert('Este cupón ya fue canjeado. 😉');
         return; 
     }
-    
-    // Aplicamos el efecto "tachado"
+    if (!confirm("¿Segura que quieres canjear este cupón ahora?")) return;
     cardSlot.classList.add('coupon-redeemed');
-    
     const coupon = couponsToUnlock.find(c => c.id === couponId);
     if (!coupon) return;
-
-    // Añadimos el texto "CANJEADO"
     const overlayContainer = cardSlot.querySelector('.redeem-overlay-container');
     if (overlayContainer) {
         overlayContainer.innerHTML = '<div class="redeem-overlay">CANJEADO</div>';
     }
-
-    // Guardamos en memoria
     saveRedeemedCoupon(couponId); 
-
-    // Preparamos y abrimos el aviso por email
-    const tuEmail = 'TU-EMAIL-AQUI@gmail.com'; // <-- ¡Recuerda cambiar esto!
+    
+    const tuEmail = 'TU-EMAIL-AQUI@gmail.com'; // <-- ¡CAMBIA ESTO POR TU EMAIL!
     
     const subject = `¡Cupón Canjeado: ${coupon.title}!`;
-    const body = `¡Hola mi amor!
-    
-Solo para que sepas que acabo de canjear este cupón:
-    
-"${coupon.title}"
-    
-¡Prepárate!
-    
-Te amo.
-    `;
-    
+    const body = `¡Hola mi amor!\n\nSolo para que sepas que acabo de canjear este cupón:\n\n"${coupon.title}"\n\n¡Prepárate!\n\nTe amo.`;
     const encodedSubject = encodeURIComponent(subject);
     const encodedBody = encodeURIComponent(body);
-    
     window.open(`mailto:${tuEmail}?subject=${encodedSubject}&body=${encodedBody}`, '_blank');
 }
