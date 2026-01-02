@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feliz Cumpleaños, Mi Amor</title>
+    <title>30 Años - Tu Cuponera Especial</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     
     <script>
@@ -32,345 +28,259 @@
     </script>
 
     <style>
-        body { background-color: #FDFBF5; margin: 0; padding: 0; }
-        header, section, footer { text-align: center; }
-
-        /* ANIMACIONES */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .coupon-animate { animation: fadeUp 0.6s ease forwards; }
-
-        /* DISEÑO DE TICKET */
+        body { background-color: #FDFBF5; scroll-behavior: smooth; }
         .ticket-design {
-            border: 2px dashed #d1d5db;
-            background-color: #ffffff;
-            position: relative;
-            transition: all 0.3s ease;
+            border: 2px dashed #d1d5db; background-color: #ffffff; position: relative;
         }
         .ticket-design::before, .ticket-design::after {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background-color: #FDFBF5;
-            border-radius: 50%;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10;
+            content: ''; position: absolute; width: 24px; height: 24px;
+            background-color: #FDFBF5; border-radius: 50%; top: 50%; transform: translateY(-50%);
         }
         .ticket-design::before { left: -14px; border-right: 2px dashed #d1d5db; }
         .ticket-design::after { right: -14px; border-left: 2px dashed #d1d5db; }
 
-        /* CONTADOR */
-        .countdown-container {
-            padding: 2rem;
-            background-color: #ffffff;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border-top: 4px solid #d4af37;
-            max-width: 600px;
-            margin: 2rem auto;
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .countdown-number { font-size: 2.5rem; font-weight: 700; color: #722f37; }
-        .countdown-label { font-family: 'Dancing Script', cursive; font-size: 1.1rem; color: #4b5563; }
-
-        /* ESTADO CANJEADO */
-        .coupon-redeemed { opacity: 0.6; filter: grayscale(0.7); }
-        .text-strike {
-            text-decoration: line-through !important;
-            text-decoration-color: #ef4444 !important;
-            text-decoration-thickness: 3px !important;
-        }
+        .coupon-redeemed { opacity: 0.5; filter: grayscale(1); }
+        .text-strike { text-decoration: line-through; text-decoration-color: #ef4444; text-decoration-thickness: 3px; }
+        
         .redeem-overlay {
-            position: absolute;
-            top: 50%; left: 0; right: 0;
-            background-color: #ef4444;
-            color: white;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 0.5rem;
-            transform: rotate(-10deg) translateY(-50%);
-            z-index: 50;
-            font-size: 1.5rem;
-            text-align: center;
-            pointer-events: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: absolute; top: 50%; left: 0; right: 0;
+            background-color: #ef4444; color: white; font-weight: 800;
+            text-transform: uppercase; padding: 0.5rem; transform: rotate(-10deg) translateY(-50%);
+            z-index: 50; font-size: 1.5rem; text-align: center; pointer-events: none;
         }
 
-        /* CUPÓN BLOQUEADO */
-        .coupon-locked {
-            background-color: #f3f4f6;
-            border: 2px dashed #9ca3af;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .lock-bg-img {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.1;
-            filter: grayscale(1);
+        .animate-pop { animation: popIn 0.5s ease forwards; }
+
+        /* Estilo para el contador */
+        .countdown-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            min-width: 80px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <header class="mb-10">
-        <h1 class="font-script text-5xl md:text-7xl text-gray-800">Feliz Cumpleaños mor, Que los cumplas muy feliz</h1>
-        <p class="font-script text-2xl text-brand-wine mt-2 text-center">Tu Cuponera de Regalos para 2026</p>
-         <p class="font-script text-2xl text-brand-wine mt-2 text-center">Porque 30 se cumplen todo el año</p>
-    </header>
+    <div id="countdown-wrapper" class="hidden min-h-[80vh] flex flex-col items-center justify-center text-center">
+        <h1 class="font-script text-6xl md:text-8xl text-gray-800 mb-4">Felices 30</h1>
+        <p class="font-script text-3xl text-brand-wine mb-12">Tu año de sorpresas comienza en...</p>
+        <div class="flex gap-4 md:gap-8 flex-wrap justify-center">
+            <div class="countdown-item"><span id="cd-days" class="text-4xl font-bold text-brand-wine">00</span><br><span class="text-xs uppercase">Días</span></div>
+            <div class="countdown-item"><span id="cd-hours" class="text-4xl font-bold text-brand-wine">00</span><br><span class="text-xs uppercase">Horas</span></div>
+            <div class="countdown-item"><span id="cd-mins" class="text-4xl font-bold text-brand-wine">00</span><br><span class="text-xs uppercase">Mins</span></div>
+            <div class="countdown-item"><span id="cd-secs" class="text-4xl font-bold text-brand-wine">00</span><br><span class="text-xs uppercase">Segs</span></div>
+        </div>
+        <p class="mt-12 italic text-gray-400">“Lo bueno se hace esperar...”</p>
+    </div>
 
-    <main class="max-w-6xl mx-auto">
-        <!-- SECCIÓN CONTADOR -->
-        <section id="countdown-section" class="mb-12 hidden">
-            <h2 class="font-script text-3xl mb-4 text-gray-700">Tu año de sorpresas comienza en...</h2>
-            <div class="countdown-container">
-                <div><div id="days" class="countdown-number">00</div><div class="countdown-label">Días</div></div>
-                <div><div id="hours" class="countdown-number">00</div><div class="countdown-label">Horas</div></div>
-                <div><div id="mins" class="countdown-number">00</div><div class="countdown-label">Mins</div></div>
-                <div><div id="secs" class="countdown-number">00</div><div class="countdown-label">Segs</div></div>
-            </div>
-        </section>
+    <div id="main-content" class="hidden">
+        <header class="mb-12 text-center">
+            <h1 class="font-script text-6xl md:text-8xl text-gray-800">Felices 30</h1>
+            <p class="font-script text-2xl text-brand-wine mt-2 italic">Un año lleno de momentos solo para ti</p>
+        </header>
 
-        <!-- SECCIÓN ADELANTO -->
-        <section id="teaser-section" class="mb-12 hidden">
-            <h2 class="font-script text-4xl mb-6 text-brand-wine">¡Un Adelanto Exclusivo!</h2>
-            <div id="teaser-card" class="coupon-locked rounded-xl p-10 cursor-pointer hover:scale-105 transition-all max-w-lg mx-auto shadow-md">
-                <span class="text-5xl mb-4">🎁</span>
-                <h3 class="font-script text-3xl text-gray-600 relative z-10">Toca para abrir...</h3>
-            </div>
-        </section>
+        <main class="max-w-6xl mx-auto space-y-16">
+            <section>
+                <h2 class="font-script text-5xl text-center text-gray-800 mb-8">Eventos Especiales</h2>
+                <div id="specials-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </section>
 
-        <!-- SECCIÓN PRINCIPAL -->
-        <section id="coupons-section" class="hidden">
-            <h2 class="font-script text-5xl text-gray-800 mb-6 text-center">Momentos Especiales</h2>
-            <div id="date-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20"></div>
+            <hr class="border-dashed border-gray-300">
 
-            <hr class="border-dashed border-gray-300 mb-16">
+            <section>
+                <h2 class="font-script text-5xl text-center text-gray-800 mb-8">Talonario "A Tu Antojo"</h2>
+                <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </section>
 
-            <h2 class="font-script text-5xl text-gray-800 mb-6 text-center">Talonario "A Tu Antojo"</h2>
-            <div id="demand-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        </section>
-    </main>
+            <section id="secret-section" class="hidden pt-10 border-t-4 border-double border-red-200">
+                <h2 class="font-script text-5xl text-center text-red-700 mb-10 italic">El Baúl Secreto 🔥</h2>
+                <div id="secret-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </section>
+        </main>
+    </div>
 
-    <footer class="mt-20 opacity-50 text-sm italic py-10 text-center">
-        Hecho con ❤️ por tu esposo
+    <footer class="mt-24 py-10 text-center border-t border-gray-100">
+        <p class="text-gray-400 text-sm italic">
+            Hecho con <span id="secret-trigger" class="cursor-pointer text-red-300 hover:text-red-500 transition-colors">❤️</span> por tu esposo • 2026
+        </p>
+        <p class="text-gray-400 text-xs mt-2 italic">El exceso de cupones puede generar gruñoncitis, úselos con moderación</p>
     </footer>
 
     <script>
         // ======================================================
-        // DATA DE CUPONES (RESTAURADA A 35 ITEMS)
+        // CONFIGURACIÓN (Activa MODO_PRUEBA para ver todo hoy)
         // ======================================================
-        const coupons = [
-            // --- ESPECIALES (CON IMAGEN) ---
-            { id: 'cumple', unlockDate: '2025-01-03T00:00:00', title: '¡Feliz Cumpleaños!', description: 'Hoy eres la Reina y la vas a pasar muy bien.', imageUrl: './img/cumple.jpg', category: 'Día Especial', hasImage: true },
-            { id: 'medellin', unlockDate: '2025-02-13T08:00:00', title: 'Aniversario en Medellín', description: 'Escapada romántica a la Eterna Primavera. Solo tú y yo celebrando nuestro amor.', imageUrl: './img/medellin.jpeg', category: 'Día Especial', hasImage: true },
-            { id: 'cartagena', unlockDate: '2025-02-28T08:00:00', title: 'Cartagena con Mamá', description: '¡Sol, brisa y mar! Te vas de viaje con tu mamá para disfrutar juntas.', imageUrl: './img/cartagena.png', category: 'Día Especial', hasImage: true },
-            { id: 'fantasia',unlockDate: '2025-02-28T08:00:00', title: 'Noche de Fantasía', description: 'Masaje erótico realizado por una chica (conmigo como espectador).', imageUrl: './img/masaje.jpeg', category: 'Día Especial', hasImage: true },
+        const MODO_PRUEBA = false; 
+        const TU_EMAIL = "josuedaniel729@gmail.com"; 
+        const UNLOCK_DATE = new Date('2026-01-03T07:00:00'); // Desbloqueo mañana a las 7 am
 
+        const coupons = [
+            // --- ESPECIALES ---
+            { id: 'cumple', unlockDate: '2026-01-03T00:00:00', title: '¡Feliz Cumpleaños!', description: 'Hoy eres la Reina y la vas a pasar muy bien.', imageUrl: './img/cumple.jpg', category: 'Día Especial', hasImage: true },
+            { id: 'medellin', unlockDate: '2026-01-25T08:00:00', title: 'Aniversario en Medellín', description: 'Escapada romántica con jacuzzi para nuestro aniversario 13.', imageUrl: './img/medellin.jpeg', category: 'Día Especial', hasImage: true },
+            { id: 'cartagena', unlockDate: '2026-01-02T08:00:00', title: 'Cartagena con Mamá', description: '¡Sol, brisa y mar! Un viaje especial para ti y tu madre.', imageUrl: './img/cartagena.png', category: 'Día Especial', hasImage: true },
+            
             // --- ROMÁNTICOS ---
-            { id: 'rom-01', title: 'Chuchitos Ilimitados', description: 'Sesión de muchos besitos sin derecho a negarme.', emoji: '💋', category: 'Romántico' },
-            { id: 'rom-02', title: 'Cuddle Time', description: 'Dejo de jugar inmediatamente para ir a arruncharme contigo.', emoji: '🎮', category: 'Romántico' },
-            { id: 'rom-03', title: 'Cita Sorpresa', description: 'Tú solo encárgate de verte hermosa, yo me encargo del resto.', emoji: '🕯️', category: 'Romántico' },
-            { id: 'rom-04', title: 'Cine a tu Antojo', description: 'Vemos la película que TÚ elijas. Incluye crispetas y papitas.', emoji: '🍿', category: 'Romántico' },
-            { id: 'rom-05', title: 'Botón de Contentarse', description: 'Si estoy de mal genio, este cupón me obliga a darte un abrazo.', emoji: '🫂', category: 'Romántico' },
-            { id: 'rom-08', title: 'Fotógrafo Personal', description: 'Paciencia infinita para todas las fotos que quieras.', emoji: '📸', category: 'Romántico' },
-            { id: 'rom-09', title: 'Dueña del Auxiliar', description: 'Tú eres la DJ hoy. No se vale criticar tus canciones.', emoji: '🎵', category: 'Romántico' },
-            { id: 'rom-10', title: 'Carta del Futuro', description: 'Te escribiré una carta hablándote de lo que sueño contigo.', emoji: '✉️', category: 'Romántico' },
-            { id: 'rom-11', title: 'Poder de Veto', description: '¿Pereza de ir a un plan? Yo pongo la excusa perfecta.', emoji: '🏠', category: 'Romántico' },
+            { id: 'rom-01', title: 'Chuchitos Ilimitados', description: 'Sesión de chuchitos sin derecho a negarme.', emoji: '💋', category: 'Romántico' },
+            { id: 'rom-02', title: 'Cuddle Time', description: 'Dejo de jugar Dofus para ir a arruncharme.', emoji: '🎮', category: 'Romántico' },
+            { id: 'rom-03', title: 'Cita Sorpresa', description: 'Yo planeo todo, tú solo te pones hermosa.', emoji: '🕯️', category: 'Romántico' },
+            { id: 'rom-04', title: 'Cine a tu Antojo', description: 'Vemos la película que TÚ elijas. Incluye snacks.', emoji: '🍿', category: 'Romántico' },
+            { id: 'rom-05', title: 'Botón de Contentarse', description: 'Si estoy de mal genio, este vale me obliga a un abrazo.', emoji: '🫂', category: 'Romántico' },
+            { id: 'rom-08', title: 'Sesión fotográfica', description: 'Vamos a un parque y nos tomaremos tantas fotos como desees.', emoji: '📸', category: 'Romántico' },
+            { id: 'rom-09', title: 'Dueña de la playlist', description: 'Tú eres la DJ. Sin críticas hoy, cantaremos a todo pulmón.', emoji: '🎵', category: 'Romántico' },
+            { id: 'rom-10', title: 'Planeando nuestra vida', description: 'Hablaremos de nuestro futuro, dónde vivir y planes con nuestro hijo/a.', emoji: '✉️', category: 'Romántico' },
+            { id: 'rom-11', title: 'Poder de Veto', description: 'Me comprometo a no ver el partido y dedicarme solo a ti.', emoji: '🏠', category: 'Romántico' },
 
             // --- RELAJACIÓN ---
-            { id: 'rel-01', title: 'Masaje de Pies VIP', description: '20 minutos de masaje relajante sin quejas.', emoji: '🦶', category: 'Relajación' },
-            { id: 'rel-02', title: 'Modo Avión', description: 'Una hora de mi atención indivisa. Sin celulares.', emoji: '🛫', category: 'Relajación' },
-            { id: 'rel-03', title: 'Vale por Dormir', description: 'Mañana yo me encargo de todo. Tú duermes hasta tarde.', emoji: '🛌', category: 'Relajación' },
-            { id: 'rel-04', title: 'Spa Casero', description: 'Baño caliente, velas y música relajante lista para ti.', emoji: '🛁', category: 'Relajación' },
-            { id: 'rel-06', title: 'Día Sin Decisiones', description: 'Hoy no decides nada. Yo me encargo absolutamente de todo.', emoji: '🛋️', category: 'Relajación' },
-            { id: 'rel-07', title: 'Tarde de Silencio', description: 'Sin hablar, solo paz, calma y compañía.', emoji: '🤫', category: 'Relajación' },
+            { id: 'rel-01', title: 'Masaje de Pies VIP', description: '20 minutos de relax total después de un día largo.', emoji: '🦶', category: 'Relajación' },
+            { id: 'rel-02', title: 'English mode', description: 'Let’s talk only in English for the rest of the day.', emoji: '🇬🇧', category: 'Relajación' },
+            { id: 'rel-03', title: 'Vale por Dormir', description: 'Yo cuido a las gatas. Tú duerme hasta tarde.', emoji: '🛌', category: 'Relajación' },
+            { id: 'rel-04', title: 'Spa Casero', description: 'Baño caliente, skin routine, exfoliación y manicure.', emoji: '🛁', category: 'Relajación' },
+            { id: 'rel-06', title: 'Día Sin Decisiones', description: 'Hoy no eliges ni qué comer. Yo me encargo.', emoji: '🛋️', category: 'Relajación' },
+            { id: 'rel-07', title: 'Maratón de series', description: 'Dedicamos la tarde a ver esa serie que te tiene enganchada.', emoji: '🤫', category: 'Relajación' },
 
             // --- FAMILIAR ---
-            { id: 'fam-01', title: 'El Primer Juguete', description: 'Vamos juntos a comprar el primer juguete para nuestro hij@.', emoji: '🧸', category: 'Familiar' },
-            { id: 'fam-02', title: 'Día con los Abuelos', description: 'Día completo en familia: helado y comida con ellos.', emoji: '👵', category: 'Familiar' },
-            { id: 'fam-03', title: 'Antojo de Medianoche', description: 'No importa la hora, salgo a conseguir lo que quieras.', emoji: '🍦', category: 'Familiar' },
-            { id: 'fam-04', title: 'Menú a la Carta', description: 'Tú eliges qué comer, yo voy al súper y cocino.', emoji: '🥘', category: 'Familiar' },
-            { id: 'fam-05', title: 'Desayuno Real', description: 'Te llevo el desayuno a la cama con todo lo que te gusta.', emoji: '🍳', category: 'Familiar' },
-            { id: 'fam-09', title: 'Nuestra Tradición', description: 'Crearemos una tradición solo nuestra para cada año.', emoji: '🕯️', category: 'Familiar' },
+            { id: 'fam-01', title: 'El Primer Juguete', description: 'Elegiremos el primer detalle para nuestro futuro hijo/a.', emoji: '🧸', category: 'Familiar' },
+            { id: 'fam-02', title: 'Día con tus papás', description: 'Compartiremos el día con tu familia.', emoji: '👵', category: 'Familiar' },
+            { id: 'fam-03', title: 'Antojo de Medianoche', description: 'Voy por lo que quieras, no importa la hora.', emoji: '🍦', category: 'Familiar' },
+            { id: 'fam-04', title: 'Menú a la Carta', description: 'Tú pides, yo cocino y limpio absolutamente todo.', emoji: '🥘', category: 'Familiar' },
+            { id: 'fam-05', title: 'Pijamada real', description: 'Cócteles, risas y charlas hasta que salga el sol.', emoji: '🍹', category: 'Familiar' },
+            { id: 'fam-09', title: 'Nuestra Tradición', description: 'Inventaremos una tradición nueva cada año.', emoji: '🕯️', category: 'Familiar' },
 
-            // --- SEXY ---
-            { id: 'sex-01', title: 'Reto Creativo', description: 'Me pongo creativo con un reto de la app para ti.', emoji: '😈', category: 'Sexy' },
-            { id: 'sex-02', title: 'Excursión Prohibida', description: 'Nos vamos en el carro a empañar los vidrios.', emoji: '🚗', category: 'Sexy' },
-            { id: 'sex-03', title: 'Garantía de Placer', description: 'Te aseguras por lo menos dos orgasmos esta noche.', emoji: '🌶️', category: 'Sexy' },
-            { id: 'sex-04', title: 'Mañanero Garantizado', description: 'Te despierto antes para iniciar el día con mucho placer.', emoji: '🌅', category: 'Sexy' },
-            { id: 'sex-05', title: 'Pasarela Privada', description: 'Tú eliges la lencería, yo pago, y me das un desfile.', emoji: '👠', category: 'Sexy' },
-            { id: 'sex-06', title: 'El Rapidín', description: 'Vale por un encuentro intenso donde sea y cuando sea.', emoji: '⚡', category: 'Sexy' },
-            { id: 'sex-07', title: 'Noche de Roles', description: 'Tú eliges los personajes, yo me meto en el papel.', emoji: '🎭', category: 'Sexy' },
-            { id: 'sex-08', title: 'Strip Poker / Juego', description: 'Jugamos a lo que quieras pero apostamos prendas.', emoji: '🃏', category: 'Sexy' },
-            { id: 'sex-09', title: 'Noche Lenta', description: 'Sin afán. Sin reloj. Sin interrupciones.', emoji: '🌒', category: 'Sexy' },
-            { id: 'sex-10', title: 'Tú Mandas', description: 'Esta noche todo lo decides tú. Yo obedezco.', emoji: '👑', category: 'Sexy' }
+            // --- SEXY (EL BAÚL) ---
+            { id: 'fantasia', unlockDate: '2026-01-25T08:00:00', title: 'Noche de Fantasía', description: 'Masaje erótico sorpresa (conmigo como espectador).', imageUrl: 'https://images.unsplash.com/photo-1544161515-4af6b1d4640b?w=500', category: 'Sexy', hasImage: true },
+            { id: 'sex-01', title: 'Reto Creativo', description: 'Me pongo creativo con un reto picante.', emoji: '😈', category: 'Sexy' },
+            { id: 'sex-02', title: 'Excursión Prohibida', description: 'Empañar los vidrios del carro.', emoji: '🚗', category: 'Sexy' },
+            { id: 'sex-03', title: 'Garantía de Placer', description: 'Noche enfocada 100% en tu máximo placer.', emoji: '🌶️', category: 'Sexy' },
+            { id: 'sex-04', title: 'Mañanero Garantizado', description: 'Iniciar el día con energía y mucho placer.', emoji: '🌅', category: 'Sexy' },
+            { id: 'sex-05', title: 'Pasarela Privada', description: 'Tú estrenas lencería y me das un desfile.', emoji: '👠', category: 'Sexy' },
+            { id: 'sex-06', title: 'El Rapidín', description: 'Donde sea y cuando sea.', emoji: '⚡', category: 'Sexy' },
+            { id: 'sex-07', title: 'Noche de Roles', description: 'Personajes nuevos... ¿Quiénes seremos?', emoji: '🎭', category: 'Sexy' },
+            { id: 'sex-08', title: 'Apuesta y Gana', description: 'Jugamos a lo que quieras; prendas son apuestas.', emoji: '🃏', category: 'Sexy' },
+            { id: 'sex-09', title: 'Escritores', description: 'Escribiremos juntos un relato erótico.', emoji: '✍️', category: 'Sexy' },
+            { id: 'sex-10', title: 'Noche Lenta', description: 'Sin relojes, sin prisa, solo piel.', emoji: '🌒', category: 'Sexy' },
+            { id: 'sex-11', title: 'Amarrada por tu bien', description: 'Hoy te sometes. Eres mi juguete favorito.', emoji: '⛓️', category: 'Sexy' },
+            { id: 'sex-12', title: 'Tú Mandas', description: 'Yo solo obedezco órdenes. Soy todo tuyo.', emoji: '👑', category: 'Sexy' }
         ];
 
-        const categoryStyles = {
-            'Romántico': 'bg-pink-100 text-pink-800',
-            'Familiar': 'bg-green-100 text-green-800',
-            'Relajación': 'bg-blue-100 text-blue-800',
-            'Sexy': 'bg-red-100 text-red-800',
-            'Día Especial': 'bg-yellow-100 text-yellow-800',
-            'Default': 'bg-gray-100 text-gray-800'
+        const catStyles = { 'Romántico': 'bg-pink-100 text-pink-700', 'Relajación': 'bg-blue-100 text-blue-700', 'Familiar': 'bg-green-100 text-green-700', 'Día Especial': 'bg-yellow-100 text-yellow-700', 'Sexy': 'bg-red-100 text-red-700' };
+
+        function getRedeemed() { return JSON.parse(localStorage.getItem('redeemed_2026_final') || '{}'); }
+
+        // Mezcla estable para normales
+        const shuffledNormal = coupons.filter(c => ['Romántico', 'Relajación', 'Familiar'].includes(c.category)).sort(() => Math.random() - 0.5);
+
+        function checkStatus() {
+            const now = new Date();
+            const wrapper = document.getElementById('countdown-wrapper');
+            const content = document.getElementById('main-content');
+
+            if (now < UNLOCK_DATE && !MODO_PRUEBA) {
+                wrapper.classList.remove('hidden');
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            } else {
+                content.classList.remove('hidden');
+                render();
+            }
+        }
+
+        function updateCountdown() {
+            const diff = UNLOCK_DATE - new Date();
+            if (diff <= 0) { window.location.reload(); return; }
+            document.getElementById('cd-days').innerText = Math.floor(diff / 86400000).toString().padStart(2, '0');
+            document.getElementById('cd-hours').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
+            document.getElementById('cd-mins').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            document.getElementById('cd-secs').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        }
+
+        function render() {
+            const specialsGrid = document.getElementById('specials-grid');
+            const mainGrid = document.getElementById('main-grid');
+            const secretGrid = document.getElementById('secret-grid');
+            const redeemed = getRedeemed();
+            const now = new Date();
+
+            // Especiales (Estáticos arriba)
+            const specials = coupons.filter(c => c.category === 'Día Especial');
+            specialsGrid.innerHTML = specials.map(c => renderCard(c, redeemed[c.id], now)).join('');
+
+            // Talonario revuelto
+            mainGrid.innerHTML = shuffledNormal.map(c => renderCard(c, redeemed[c.id], now)).join('');
+
+            // Sexy (Baúl)
+            const sexy = coupons.filter(c => c.category === 'Sexy');
+            secretGrid.innerHTML = sexy.map(c => renderCard(c, redeemed[c.id], now)).join('');
+        }
+
+        function renderCard(c, redeemedDate, now) {
+            // El candado individual solo para los especiales que aún no llegan
+            const isLocked = !MODO_PRUEBA && c.unlockDate && new Date(c.unlockDate) > now;
+            const style = catStyles[c.category] || 'bg-gray-100';
+            const strike = redeemedDate ? 'text-strike' : '';
+            
+            if (isLocked) {
+                const dateStr = new Date(c.unlockDate).toLocaleDateString('es-ES', {day:'numeric', month:'long'});
+                return `<div class="bg-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center border-2 border-dashed border-gray-300 opacity-60 h-64">
+                    <span class="text-4xl mb-2">🔒</span><p class="text-xs font-bold text-gray-500 uppercase">Se desbloquea el</p><p class="font-script text-2xl text-brand-wine">${dateStr}</p>
+                </div>`;
+            }
+
+            const redeemedInfo = redeemedDate ? `<p class="text-[10px] italic text-gray-400 mt-2">Canjeado el ${new Date(redeemedDate).toLocaleDateString('es-ES')}</p>` : '';
+
+            if (c.hasImage) {
+                return `<div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col relative animate-pop h-full ${redeemedDate ? 'coupon-redeemed' : ''}">
+                    <img src="${c.imageUrl}" class="w-full h-44 object-cover" onerror="this.src='https://via.placeholder.com/400x300?text=Momento+Especial'">
+                    <div class="p-6 flex-grow text-center">
+                        <span class="${style} text-[10px] px-3 py-1 rounded-full uppercase font-bold">${c.category}</span>
+                        <h3 class="font-script text-3xl my-3 ${strike}">${c.title}</h3>
+                        <p class="text-sm text-gray-600 ${strike}">${c.description}</p>
+                        ${redeemedInfo}
+                    </div>
+                    ${redeemedDate ? '<div class="redeem-overlay">CANJEADO</div>' : `<button onclick="redeem('${c.id}')" class="m-6 mt-0 bg-brand-wine text-white py-3 rounded-lg font-bold">CANJEAR AHORA</button>`}
+                </div>`;
+            }
+
+            return `<div class="ticket-design rounded-xl p-6 flex flex-col items-center text-center animate-pop h-full relative ${redeemedDate ? 'coupon-redeemed' : ''}">
+                <div class="text-4xl mb-4">${c.emoji}</div>
+                <span class="${style} text-[10px] px-3 py-1 rounded-full uppercase font-bold">${c.category}</span>
+                <h3 class="font-script text-3xl my-3 ${strike}">${c.title}</h3>
+                <p class="text-sm text-gray-600 mb-6 ${strike}">${c.description}</p>
+                ${redeemedInfo}
+                ${redeemedDate ? '<div class="redeem-overlay">CANJEADO</div>' : `<button onclick="redeem('${c.id}')" class="mt-auto border-2 border-brand-wine text-brand-wine px-6 py-2 rounded-full font-bold">USAR TICKET</button>`}
+            </div>`;
+        }
+
+        window.redeem = (id) => {
+            const c = coupons.find(x => x.id === id);
+            if (!confirm(`¿Confirmas que quieres usar "${c.title}"?`)) return;
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            const redeemed = getRedeemed();
+            redeemed[id] = new Date().toISOString();
+            localStorage.setItem('redeemed_2026_final', JSON.stringify(redeemed));
+            window.location.href = `mailto:${TU_EMAIL}?subject=Cupón Canjeado: ${c.title}&body=¡Amor! Acabo de usar mi cupón de "${c.title}". Prepárate ❤️`;
+            setTimeout(() => render(), 600);
         };
 
-        // --- MANEJO DE ESTADO ---
-        const today = new Date(); 
-        // const today = new Date('2026-01-03T10:00:00'); // Prueba Fase 3
-        
-        const birthdayDate = new Date('2025-01-03T00:00:00');
-        const teaserDate = new Date('2025-12-03T00:00:00');
-
-        function getRedeemed() { return JSON.parse(localStorage.getItem('redeemed') || '{}'); }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (today < teaserDate) {
-                showCountdown();
-            } else if (today < birthdayDate) {
-                showCountdown();
-                showTeaser();
-            } else {
-                showCoupons();
+        let clicks = 0;
+        document.getElementById('secret-trigger').addEventListener('click', () => {
+            clicks++;
+            if (clicks === 3) {
+                if (confirm("¿Quieres entrar al baúl secreto? 🔥")) {
+                    document.getElementById('secret-section').classList.remove('hidden');
+                    document.getElementById('secret-section').scrollIntoView({ behavior: 'smooth' });
+                }
+                clicks = 0;
             }
         });
 
-        function showCountdown() {
-            const sec = document.getElementById('countdown-section');
-            sec.classList.remove('hidden');
-            setInterval(() => {
-                const dist = birthdayDate - new Date();
-                if (dist < 0) return;
-                document.getElementById('days').innerText = Math.floor(dist / 86400000).toString().padStart(2,'0');
-                document.getElementById('hours').innerText = Math.floor((dist % 86400000) / 3600000).toString().padStart(2,'0');
-                document.getElementById('mins').innerText = Math.floor((dist % 3600000) / 60000).toString().padStart(2,'0');
-                document.getElementById('secs').innerText = Math.floor((dist % 60000) / 1000).toString().padStart(2,'0');
-            }, 1000);
-        }
-
-        function showTeaser() {
-            const sec = document.getElementById('teaser-section');
-            sec.classList.remove('hidden');
-            const card = document.getElementById('teaser-card');
-            card.onclick = () => {
-                const item = coupons.find(c => c.id === 'cartagena');
-                card.innerHTML = `
-                    <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full coupon-animate">
-                        <img src="${item.imageUrl}" class="w-full h-48 object-contain bg-gray-50">
-                        <div class="p-6 text-center">
-                            <h3 class="font-script text-3xl text-brand-wine">¡Un Adelanto!</h3>
-                            <p class="font-bold my-2">${item.title}</p>
-                            <p class="text-xs text-gray-500 italic">Podrás canjearlo el 28 de Febrero</p>
-                        </div>
-                    </div>`;
-            };
-        }
-
-        function showCoupons() {
-            document.getElementById('coupons-section').classList.remove('hidden');
-            const redeemed = getRedeemed();
-            const dateCont = document.getElementById('date-container');
-            const demandCont = document.getElementById('demand-container');
-
-            coupons.forEach(c => {
-                const redeemedDate = redeemed[c.id];
-                const isLocked = c.unlockDate && new Date(c.unlockDate) > today;
-                const html = isLocked ? createLocked(c) : createUnlocked(c, redeemedDate);
-                (c.unlockDate ? dateCont : demandCont).innerHTML += `<div id="slot-${c.id}" class="h-full coupon-animate">${html}</div>`;
-            });
-        }
-
-        function createUnlocked(c, redeemedDate) {
-            const style = categoryStyles[c.category] || categoryStyles.Default;
-            const strike = redeemedDate ? 'text-strike' : '';
-            
-            if (c.hasImage) {
-                return `
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-brand-gold h-full flex flex-col relative ${redeemedDate ? 'coupon-redeemed' : ''}">
-                        <img src="${c.imageUrl}" class="w-full h-48 object-cover" onerror="this.src='https://placehold.co/400x300?text=Especial'">
-                        <div class="p-6 flex-grow text-center">
-                            <span class="${style} text-[10px] px-3 py-1 rounded-full uppercase font-bold">${c.category}</span>
-                            <h3 class="font-script text-3xl my-3 text-gray-800 ${strike}">${c.title}</h3>
-                            <p class="text-sm text-gray-600 leading-relaxed ${strike}">${c.description}</p>
-                        </div>
-                        <div class="p-6 pt-0 text-center">
-                            <button onclick="redeem('${c.id}')" class="w-full bg-brand-wine text-white py-3 rounded-lg font-bold hover:bg-opacity-90 transition-all ${redeemedDate ? 'hidden' : ''}">Canjear Ahora</button>
-                            ${redeemedDate ? `<p class="text-[10px] mt-2 italic text-gray-400">Canjeado el ${new Date(redeemedDate).toLocaleDateString()}</p>` : ''}
-                        </div>
-                        ${redeemedDate ? '<div class="redeem-overlay">CANJEADO</div>' : ''}
-                    </div>`;
-            } else {
-                return `
-                    <div class="ticket-design rounded-xl shadow-md p-6 h-full flex flex-col relative ${redeemedDate ? 'coupon-redeemed' : ''}">
-                        <div class="text-4xl mb-4 text-center">${c.emoji || '🎁'}</div>
-                        <div class="flex-grow text-center">
-                            <span class="${style} text-[10px] px-3 py-1 rounded-full uppercase font-bold">${c.category}</span>
-                            <h3 class="font-script text-3xl my-3 text-gray-800 ${strike}">${c.title}</h3>
-                            <p class="text-sm text-gray-600 leading-relaxed ${strike}">${c.description}</p>
-                        </div>
-                        <div class="mt-6 text-center">
-                            <button onclick="redeem('${c.id}')" class="w-full border-2 border-brand-wine text-brand-wine py-2 rounded-lg font-bold hover:bg-brand-wine hover:text-white transition-colors ${redeemedDate ? 'hidden' : ''}">Canjear Ticket</button>
-                            ${redeemedDate ? `<p class="text-[10px] mt-2 italic text-gray-400">Canjeado el ${new Date(redeemedDate).toLocaleDateString()}</p>` : ''}
-                        </div>
-                        ${redeemedDate ? '<div class="redeem-overlay">CANJEADO</div>' : ''}
-                    </div>`;
-            }
-        }
-
-        function createLocked(c) {
-            const date = new Date(c.unlockDate).toLocaleDateString('es-ES', {day:'numeric', month:'long'});
-            return `
-                <div class="coupon-locked rounded-xl p-8 text-center h-full shadow-inner overflow-hidden">
-                    <img src="${c.imageUrl}" class="lock-bg-img">
-                    <span class="text-4xl mb-2 relative z-10">🔒</span>
-                    <p class="font-bold text-gray-600 relative z-10">Se desbloquea el</p>
-                    <p class="text-brand-wine font-bold text-xl relative z-10">${date}</p>
-                </div>`;
-        }
-
-        window.redeem = function(id) {
-            const redeemed = getRedeemed();
-            if (redeemed[id]) return;
-
-            const c = coupons.find(x => x.id === id);
-            const msg = `Este momento es solo tuyo 💛\n\n¿Segura que quieres canjear:\n"${c.title}"?\n\nPrometo hacerlo inolvidable.`;
-            
-            if (!confirm(msg)) return;
-            
-            // Visual inmediato
-            const slot = document.getElementById(`slot-${id}`);
-            const card = slot.querySelector('div');
-            card.classList.add('coupon-redeemed');
-            card.querySelectorAll('h3, p').forEach(t => t.classList.add('text-strike'));
-            if (card.querySelector('button')) card.querySelector('button').classList.add('hidden');
-            const overlay = document.createElement('div');
-            overlay.className = 'redeem-overlay';
-            overlay.innerText = 'CANJEADO';
-            card.appendChild(overlay);
-
-            // Guardar con fecha
-            redeemed[id] = new Date().toISOString();
-            localStorage.setItem('redeemed', JSON.stringify(redeemed));
-            
-            // Mail
-            const tuEmail = 'TU-EMAIL-AQUI@gmail.com'; // CAMBIA ESTO
-            window.location.href = `mailto:${tuEmail}?subject=Cupón Canjeado: ${c.title}&body=Amor, acabo de canjear mi cupón de "${c.title}". ¡Prepárate!`;
-            
-            setTimeout(() => window.location.reload(), 2000);
-        };
+        checkStatus();
     </script>
 </body>
 </html>
